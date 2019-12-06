@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/kyohei.okawa/Desktop/SkipList/SkipList.h
+iostream
+-
+sstream
+-
+
+/Users/kyohei.okawa/Desktop/SkipList/main.cpp
+iostream
+-
+SkipList.h
+/Users/kyohei.okawa/Desktop/SkipList/SkipList.h
+
