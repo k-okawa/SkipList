@@ -15,22 +15,26 @@ public:
     K _key;
     V _value;
     SkipNode<K, V, MAX_LEVEL>* _forwards[MAX_LEVEL];
+    SkipNode<K, V, MAX_LEVEL>* _backwards[MAX_LEVEL];
 
     SkipNode() {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
+            _backwards[i] = NULL;
         }
     }
 
     SkipNode(K key) : _key(key) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
+            _backwards[i] = NULL;
         }
     }
 
     SkipNode(K key, V value) : _key(key), _value(value) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
+            _backwards[i] = NULL;
         }
     }
 
@@ -61,6 +65,7 @@ public:
         _tail = new NodeType(maxKey);
         for(int i = 0; i < MAX_LEVEL; i++) {
             _header->_forwards[i] = _tail;
+            _tail->_backwards[i] = _header;
         }
     }
 
@@ -98,7 +103,9 @@ public:
         currentNode = new NodeType(key,value);
         for(int i = 0; i <= randomLevel; i++) {
             currentNode->_forwards[i] = updateNode[i]->_forwards[i];
+            currentNode->_backwards[i] = updateNode[i];
             updateNode[i]->_forwards[i] = currentNode;
+            currentNode->_forwards[i]->_backwards[i] = currentNode;
         }
     }
 
