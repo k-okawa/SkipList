@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #include "SkipList.h"
 
 using namespace std;
@@ -23,10 +24,32 @@ int main() {
 //    cout << skipList.Print() << std::endl;
 //    skipList.Insert(4332,"yeah");
 //    cout << skipList.Print() << std::endl;
+
+
     SkipList<int, string> skipList(0,INT_MAX);
-    for(int i = 0; i < 1000; i++) {
-        skipList.Insert(rand()%1000,"a");
-        cout << skipList.Print() << std::endl;
+
+    auto start = clock();
+    skipList.Insert(4444,"hello");
+    auto end = clock();
+    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+    cout << "first insert time = " << time << endl;
+
+    start = clock();
+    for(int i = 0; i < 1000000; i++) {
+        skipList.Insert(rand()%100000,"a");
+        //cout << skipList.Print() << std::endl;
+        //cout << "progress:" << i << std::endl;
     }
+    end = clock();
+    cout << skipList.Print() << std::endl;
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+    cout << "many insert time = " << time << endl;
+
+    start = clock();
+    skipList.Insert(3334, "last");
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+    cout << "last insert time = " << time << endl;
+
     return 0;
 }

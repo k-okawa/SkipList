@@ -39,7 +39,7 @@ public:
     }
 };
 
-template<class K, class V, int MAX_LEVEL=10>
+template<class K, class V, int MAX_LEVEL=32>
 class SkipList {
     typedef SkipNode<K, V, MAX_LEVEL> NodeType;
 
@@ -80,7 +80,7 @@ public:
         NodeType* currentNode = _header;
         NodeType* beforeNode = _header;
         for(int i = _currentMaxLevel; i >= 0; i--) {
-            currentNode = _header->_forwards[i];
+            currentNode = beforeNode->_forwards[i];
             while(currentNode->_key < key) {
                 beforeNode = currentNode;
                 currentNode = currentNode->_forwards[i];
@@ -131,8 +131,8 @@ private:
 
     int GetRondomLevel() {
         int level = 0;
-        double p = 0.5;
-        while(UniformRandom() < p && level < MAX_LEVEL) {
+        double p = 0.25;
+        while(UniformRandom() < p && level < MAX_LEVEL - 1) {
             level++;
         }
         return level;
