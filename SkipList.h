@@ -16,11 +16,13 @@ public:
     V _value;
     SkipNode<K, V, MAX_LEVEL>* _forwards[MAX_LEVEL];
     SkipNode<K, V, MAX_LEVEL>* _backwards[MAX_LEVEL];
+    int _forwardSpans[MAX_LEVEL];
 
     SkipNode() {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
+            _forwardSpans[i] = 0;
         }
     }
 
@@ -28,6 +30,7 @@ public:
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
+            _forwardSpans[i] = 0;
         }
     }
 
@@ -35,6 +38,7 @@ public:
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
+            _forwardSpans[i] = 0;
         }
     }
 
@@ -53,6 +57,7 @@ private:
     NodeType* _header;
     NodeType* _tail;
     int _currentMaxLevel;
+    int _length;
 
 public:
     SkipList(K minKey, K maxKey):
@@ -60,11 +65,13 @@ public:
     _tail(NULL),
     _minKey(minKey),
     _maxKey(maxKey),
-    _currentMaxLevel(0){
+    _currentMaxLevel(0),
+    _length(0) {
         _header = new NodeType(minKey);
         _tail = new NodeType(maxKey);
         for(int i = 0; i < MAX_LEVEL; i++) {
             _header->_forwards[i] = _tail;
+            _header->_forwardSpans[i] = 1;
             _tail->_backwards[i] = _header;
         }
     }
@@ -81,6 +88,7 @@ public:
     }
 
     void Insert(K key, V value) {
+        _length++;
         NodeType* updateNode[MAX_LEVEL];
         NodeType* currentNode = _header;
         NodeType* beforeNode = _header;
@@ -91,22 +99,44 @@ public:
                 currentNode = currentNode->_forwards[i];
             }
             updateNode[i] = beforeNode;
+            updateNode[i]->_forwardSpans[i]++;
         }
 
         int randomLevel = GetRondomLevel();
         if(randomLevel > _currentMaxLevel) {
             for(int i = _currentMaxLevel + 1; i <= randomLevel; i++) {
                 updateNode[i] = _header;
+                _header->_forwardSpans[i] = _length + 1;
             }
             _currentMaxLevel = randomLevel;
         }
         currentNode = new NodeType(key,value);
         for(int i = 0; i <= randomLevel; i++) {
+            auto befUpdateNodeForward = updateNode[i]->_forwards[i];
             currentNode->_forwards[i] = updateNode[i]->_forwards[i];
-            currentNode->_backwards[i] = updateNode[i];
             updateNode[i]->_forwards[i] = currentNode;
+            currentNode->_backwards[i] = updateNode[i];
             currentNode->_forwards[i]->_backwards[i] = currentNode;
+
+            int count = 0;
+            if(i > 0) {
+                auto tmp = currentNode;
+                while(tmp != befUpdateNodeForward) {
+                    tmp = tmp->_forwards[0];
+                    count++;
+                }
+                currentNode->_forwardSpans[i] = count;
+                int span = updateNode[i]->_forwardSpans[i];
+                updateNode[i]->_forwardSpans[i] = span - count;
+            } else {
+                currentNode->_forwardSpans[i] = 1;
+                updateNode[i]->_forwardSpans[i]--;
+            }
         }
+    }
+
+    int GetLength() {
+        return _length;
     }
 
     bool IsEmpty() {
@@ -119,9 +149,9 @@ public:
             NodeType *current = _header;
             while (current != _tail) {
                 if(current == _header) {
-                    sstr << "|BEGIN MINKEY=" << _header->_key;
+                    sstr << "|BEGIN MINKEY=" << _header->_key << " span=" << _header->_forwardSpans[i];
                 } else {
-                    sstr << "|key=" << current->_key << ",val=" << current->_value;
+                    sstr << "|key=" << current->_key << ",span=" << current->_forwardSpans[i];
                 }
                 current = current->_forwards[i];
             }

@@ -29,14 +29,14 @@ int main() {
     SkipList<int, string> skipList(0,INT_MAX);
 
     auto start = clock();
-    skipList.Insert(4444,"hello");
+    //skipList.Insert(4444,"hello");
     auto end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
     cout << "first insert time = " << time << endl;
 
     start = clock();
     for(int i = 0; i < 1000000; i++) {
-        skipList.Insert(rand()%100000,"a");
+        skipList.Insert(rand()%100,"a");
         //cout << skipList.Print() << std::endl;
         //cout << "progress:" << i << std::endl;
     }
@@ -44,6 +44,7 @@ int main() {
     cout << skipList.Print() << std::endl;
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
     cout << "many insert time = " << time << endl;
+    cout << "length:" << skipList.GetLength() << std::endl;
 
     start = clock();
     skipList.Insert(3334, "last");
