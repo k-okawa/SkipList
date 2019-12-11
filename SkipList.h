@@ -135,6 +135,43 @@ public:
         }
     }
 
+    bool Erase(K key) {
+        auto target = Find(key);
+        if(target == nullptr) {
+            return false;
+        }
+
+        NodeType* currentNode = _header->_forwards[_currentMaxLevel];
+        for(int i = _currentMaxLevel; i >= 0; i--) {
+            currentNode = currentNode->_backwards[i]->_forwards[i];
+            while(currentNode->_value < target->_value) {
+                currentNode = currentNode->_forwards[i];
+            }
+            if(currentNode == target) {
+                currentNode->_backwards[i]->_forwards[i] = currentNode->_forwards[i];
+                currentNode->_backwards[i]->_forwardSpans[i] = currentNode->_backwards[i]->_forwardSpans[i] + currentNode->_forwardSpans[i] - 1;
+                currentNode->_forwards[i]->_backwards[i] = currentNode->_backwards[i];
+            } else {
+                currentNode->_backwards[i]->_forwardSpans[i]--;
+            }
+        }
+
+        _length--;
+        delete target;
+        return true;
+    }
+
+    NodeType* Find(K key) {
+        NodeType* currentNode = _header->_forwards[0];
+        while(currentNode != _tail) {
+            if(currentNode->_key == key) {
+                return currentNode;
+            }
+            currentNode = currentNode->_forwards[0];
+        }
+        return nullptr;
+    }
+
     int GetLength() {
         return _length;
     }
@@ -151,13 +188,14 @@ public:
                 if(current == _header) {
                     sstr << "|BEGIN MINVALUE=" << _header->_value << " span=" << _header->_forwardSpans[i];
                 } else {
-                    sstr << "|value=" << current->_value << ",span=" << current->_forwardSpans[i];
+                    sstr << "|key=" << current->_key << " value=" << current->_value << ",span=" << current->_forwardSpans[i];
                 }
                 current = current->_forwards[i];
             }
             sstr << "|END MAXVALUE=" << _tail->_value;
             sstr << "|" << std::endl;
         }
+
         return sstr.str();
     }
 
