@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-    SkipList<string, int> skipList(0,INT_MAX);
+    SkipList<string, int> skipList(-1,INT_MAX);
 //    auto start = clock();
 //    skipList.Set("hello", 4444);
 //    auto end = clock();
@@ -22,13 +22,14 @@ int main() {
 //    cout << skipList.Print() << endl << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
 //
-//    skipList.Set("okawa", 10000);
+//    skipList.Erase("okawa");
 //
 //    cout << skipList.Print() << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
 
+    int loopCount = 1000000;
     auto start = clock();
-    for(int i = 0; i < 1000000; i++) {
+    for(int i = 0; i < loopCount; i++) {
         skipList.Set(to_string(i), rand() % 10000);
 //        cout << skipList.Print() << std::endl;
 //        cout << "progress:" << i << std::endl;
@@ -40,10 +41,21 @@ int main() {
     cout << "length:" << skipList.GetLength() << std::endl;
 
     start = clock();
-    skipList.Erase("500000");
+    for(int i = 0; i < loopCount; i++) {
+        skipList.Find(to_string(i));
+    }
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+    cout << "find time = " << time << endl;
+
+    start = clock();
+    for(int i = 0; i < loopCount; i++) {
+        skipList.Erase(to_string(i));
+    }
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
     cout << "erase time = " << time << endl;
+
 
     return 0;
 }

@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <sstream>
-#include <unordered_set>
+#include <unordered_map>
 using namespace std;
 
 template<class K,class V,int MAX_LEVEL>
@@ -59,7 +59,7 @@ private:
     NodeType* _tail;
     int _currentMaxLevel;
     int _length;
-    std::unordered_set<K> _keys;
+    std::unordered_map<K,NodeType*> _nodeMap;
 
 public:
     SkipList(V minValue, V maxValue):
@@ -112,13 +112,12 @@ public:
             }
             _currentMaxLevel = randomLevel;
         }
-        auto it = _keys.find(key);
-        if(it != _keys.end()) {
+        auto it = _nodeMap.find(key);
+        if(it != _nodeMap.end()) {
             // すでに登録されているキーの場合一度削除
             Erase(key);
         }
-        // キーを登録
-        _keys.insert(key);
+
         currentNode = new NodeType(key,value);
         for(int i = 0; i <= randomLevel; i++) {
             auto befUpdateNodeForward = updateNode[i]->_forwards[i];
@@ -142,6 +141,7 @@ public:
                 updateNode[i]->_forwardSpans[i]--;
             }
         }
+        _nodeMap[key] = currentNode;
     }
 
     bool Erase(K key) {
@@ -152,7 +152,7 @@ public:
 
         NodeType* currentNode = _header->_forwards[_currentMaxLevel];
         for(int i = _currentMaxLevel; i >= 0; i--) {
-            currentNode = currentNode->_backwards[i]->_forwards[i];
+            //currentNode = currentNode->_backwards[i]->_forwards[i];
             while(currentNode->_value < target->_value) {
                 currentNode = currentNode->_forwards[i];
             }
@@ -162,22 +162,20 @@ public:
                 currentNode->_forwards[i]->_backwards[i] = currentNode->_backwards[i];
             } else {
                 currentNode->_backwards[i]->_forwardSpans[i]--;
+                currentNode = currentNode->_backwards[i];
             }
         }
 
         _length--;
-        _keys.erase(key);
+        _nodeMap.erase(key);
         delete target;
         return true;
     }
 
     NodeType* Find(K key) {
-        NodeType* currentNode = _header->_forwards[0];
-        while(currentNode != _tail) {
-            if(currentNode->_key == key) {
-                return currentNode;
-            }
-            currentNode = currentNode->_forwards[0];
+        auto it = _nodeMap.find(key);
+        if(it != _nodeMap.end()) {
+            return it->second;
         }
         return nullptr;
     }
