@@ -26,7 +26,7 @@ public:
         }
     }
 
-    SkipNode(K key) : _key(key) {
+    SkipNode(V value) : _value(value) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
@@ -52,24 +52,24 @@ class SkipList {
     typedef SkipNode<K, V, MAX_LEVEL> NodeType;
 
 private:
-    K _minKey;
-    K _maxKey;
+    V _minValue;
+    V _maxValue;
     NodeType* _header;
     NodeType* _tail;
     int _currentMaxLevel;
     int _length;
 
 public:
-    SkipList(K minKey, K maxKey):
-    _header(NULL),
-    _tail(NULL),
-    _minKey(minKey),
-    _maxKey(maxKey),
-    _currentMaxLevel(0),
-    _length(0) {
-        _header = new NodeType(minKey);
-        _tail = new NodeType(maxKey);
-        for(int i = 0; i < MAX_LEVEL; i++) {
+    SkipList(V minValue, V maxValue):
+            _header(NULL),
+            _tail(NULL),
+            _minValue(minValue),
+            _maxValue(maxValue),
+            _currentMaxLevel(0),
+            _length(0) {
+        _header = new NodeType(minValue);
+        _tail = new NodeType(maxValue);
+        for (int i = 0; i < MAX_LEVEL; i++) {
             _header->_forwards[i] = _tail;
             _header->_forwardSpans[i] = 1;
             _tail->_backwards[i] = _header;
@@ -94,7 +94,7 @@ public:
         NodeType* beforeNode = _header;
         for(int i = _currentMaxLevel; i >= 0; i--) {
             currentNode = beforeNode->_forwards[i];
-            while(currentNode->_key < key) {
+            while(currentNode->_value < value) {
                 beforeNode = currentNode;
                 currentNode = currentNode->_forwards[i];
             }
@@ -149,13 +149,13 @@ public:
             NodeType *current = _header;
             while (current != _tail) {
                 if(current == _header) {
-                    sstr << "|BEGIN MINKEY=" << _header->_key << " span=" << _header->_forwardSpans[i];
+                    sstr << "|BEGIN MINVALUE=" << _header->_value << " span=" << _header->_forwardSpans[i];
                 } else {
-                    sstr << "|key=" << current->_key << ",span=" << current->_forwardSpans[i];
+                    sstr << "|value=" << current->_value << ",span=" << current->_forwardSpans[i];
                 }
                 current = current->_forwards[i];
             }
-            sstr << "|END MAXKEY=" << _tail->_key;
+            sstr << "|END MAXVALUE=" << _tail->_value;
             sstr << "|" << std::endl;
         }
         return sstr.str();
