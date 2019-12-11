@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 using namespace std;
 
 template<class K,class V,int MAX_LEVEL>
@@ -58,6 +59,7 @@ private:
     NodeType* _tail;
     int _currentMaxLevel;
     int _length;
+    std::unordered_set<K> _keys;
 
 public:
     SkipList(V minValue, V maxValue):
@@ -87,7 +89,7 @@ public:
         delete _tail;
     }
 
-    void Insert(K key, V value) {
+    void Set(K key, V value) {
         _length++;
         NodeType* updateNode[MAX_LEVEL];
         NodeType* currentNode = _header;
@@ -110,6 +112,13 @@ public:
             }
             _currentMaxLevel = randomLevel;
         }
+        auto it = _keys.find(key);
+        if(it != _keys.end()) {
+            // すでに登録されているキーの場合一度削除
+            Erase(key);
+        }
+        // キーを登録
+        _keys.insert(key);
         currentNode = new NodeType(key,value);
         for(int i = 0; i <= randomLevel; i++) {
             auto befUpdateNodeForward = updateNode[i]->_forwards[i];
@@ -157,6 +166,7 @@ public:
         }
 
         _length--;
+        _keys.erase(key);
         delete target;
         return true;
     }

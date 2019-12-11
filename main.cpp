@@ -7,29 +7,29 @@ using namespace std;
 int main() {
     SkipList<string, int> skipList(0,INT_MAX);
 //    auto start = clock();
-//    skipList.Insert("hello",4444);
+//    skipList.Set("hello", 4444);
 //    auto end = clock();
 //    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
 //    cout << "first insert time = " << time << endl;
-
-//    skipList.Insert("okawa",2222);
-//    skipList.Insert("koike",4423);
-//    skipList.Insert("okada", 4456);
-//    skipList.Insert("lee",1111);
-//    skipList.Insert("sakuma",600);
-//    skipList.Insert("itokazu", 3413);
+//
+//    skipList.Set("okawa", 2222);
+//    skipList.Set("koike", 4423);
+//    skipList.Set("okada", 4456);
+//    skipList.Set("lee", 1111);
+//    skipList.Set("sakuma", 600);
+//    skipList.Set("itokazu", 3413);
 //
 //    cout << skipList.Print() << endl << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
 //
-//    skipList.Erase("okawa");
+//    skipList.Set("okawa", 10000);
 //
 //    cout << skipList.Print() << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
 
     auto start = clock();
     for(int i = 0; i < 1000000; i++) {
-        skipList.Insert(to_string(i),rand()%10000);
+        skipList.Set(to_string(i), rand() % 10000);
 //        cout << skipList.Print() << std::endl;
 //        cout << "progress:" << i << std::endl;
     }
