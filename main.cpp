@@ -14,15 +14,15 @@ int main() {
 //
 //    skipList.Set("okawa", 2222);
 //    skipList.Set("koike", 4423);
-//    skipList.Set("okada", 4456);
-//    skipList.Set("lee", 1111);
-//    skipList.Set("sakuma", 600);
+//    skipList.Set("okada", 3333);
+//    skipList.Set("lee", 3333);
+//    skipList.Set("sakuma", 3333);
 //    skipList.Set("itokazu", 3413);
 //
 //    cout << skipList.Print() << endl << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
 //
-//    skipList.Erase("okawa");
+//    skipList.Erase("lee");
 //
 //    cout << skipList.Print() << endl;
 //    cout << "length:" << skipList.GetLength() << endl;
@@ -30,7 +30,7 @@ int main() {
     int loopCount = 1000000;
     auto start = clock();
     for(int i = 0; i < loopCount; i++) {
-        skipList.Set(to_string(i), rand() % 10000);
+        skipList.Set(to_string(i), rand() % loopCount);
 //        cout << skipList.Print() << std::endl;
 //        cout << "progress:" << i << std::endl;
     }
@@ -51,11 +51,14 @@ int main() {
     start = clock();
     for(int i = 0; i < loopCount; i++) {
         skipList.Erase(to_string(i));
+//        if(i == 500000)
+//            cout << skipList.Check() << endl;
     }
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
     cout << "erase time = " << time << endl;
 
+    cout << skipList.Print() << endl;
 
     return 0;
 }

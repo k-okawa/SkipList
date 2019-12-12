@@ -18,8 +18,9 @@ public:
     SkipNode<K, V, MAX_LEVEL>* _forwards[MAX_LEVEL];
     SkipNode<K, V, MAX_LEVEL>* _backwards[MAX_LEVEL];
     int _forwardSpans[MAX_LEVEL];
+    int _sameIndex;
 
-    SkipNode() {
+    SkipNode() : _sameIndex(0) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
@@ -27,7 +28,7 @@ public:
         }
     }
 
-    SkipNode(V value) : _value(value) {
+    SkipNode(V value) : _value(value),_sameIndex(0) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
@@ -35,7 +36,7 @@ public:
         }
     }
 
-    SkipNode(K key, V value) : _key(key), _value(value) {
+    SkipNode(K key, V value) : _key(key), _value(value),_sameIndex(0) {
         for(int i = 0; i < MAX_LEVEL; i++) {
             _forwards[i] = NULL;
             _backwards[i] = NULL;
@@ -96,7 +97,7 @@ public:
         NodeType* beforeNode = _header;
         for(int i = _currentMaxLevel; i >= 0; i--) {
             currentNode = beforeNode->_forwards[i];
-            while(currentNode->_value < value) {
+            while(currentNode->_value <= value) {
                 beforeNode = currentNode;
                 currentNode = currentNode->_forwards[i];
             }
@@ -141,6 +142,10 @@ public:
                 updateNode[i]->_forwardSpans[i]--;
             }
         }
+
+        if(currentNode->_backwards[0]->_value == value) {
+            currentNode->_sameIndex = currentNode->_backwards[0]->_sameIndex + 1;
+        }
         _nodeMap[key] = currentNode;
     }
 
@@ -152,9 +157,15 @@ public:
 
         NodeType* currentNode = _header->_forwards[_currentMaxLevel];
         for(int i = _currentMaxLevel; i >= 0; i--) {
-            //currentNode = currentNode->_backwards[i]->_forwards[i];
             while(currentNode->_value < target->_value) {
                 currentNode = currentNode->_forwards[i];
+            }
+            if(currentNode->_value == target->_value) {
+                while(currentNode->_value == target->_value) {
+                    if(currentNode->_key == target->_key || currentNode->_sameIndex > target->_sameIndex)
+                        break;
+                    currentNode = currentNode->_forwards[i];
+                }
             }
             if(currentNode == target) {
                 currentNode->_backwards[i]->_forwards[i] = currentNode->_forwards[i];
@@ -166,8 +177,13 @@ public:
             }
         }
 
+        while(_header->_forwards[_currentMaxLevel] == _tail) {
+            _header->_forwardSpans[_currentMaxLevel] = 1;
+            _currentMaxLevel--;
+        }
+
         _length--;
-        _nodeMap.erase(key);
+        _nodeMap.erase(target->_key);
         delete target;
         return true;
     }
@@ -205,6 +221,20 @@ public:
         }
 
         return sstr.str();
+    }
+
+    bool Check() {
+        for(int i = _currentMaxLevel; i >= 0; i--) {
+            auto current = _header;
+            while(current != _tail) {
+                auto bef = current;
+                current = current->_forwards[i];
+                if(bef->_value > current->_value) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 private:
