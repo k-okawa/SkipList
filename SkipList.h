@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
+#include <vector>
 using namespace std;
 
 template<class K,class V,int MAX_LEVEL>
@@ -219,6 +220,45 @@ public:
             }
         }
         return _length - revRank;
+    }
+
+    std::vector<std::pair<NodeType*,unsigned long>> GetRange(unsigned long first, unsigned long range) {
+        std::vector<std::pair<NodeType*,unsigned long>> ret;
+        if(first > _length) {
+            return ret;
+        }
+        if(first + range > _length) {
+            range = _length - first;
+        }
+
+        unsigned long revRank = 0;
+        NodeType* currentNode = _header->_forwards[_currentMaxLevel];
+        for(int i = _currentMaxLevel; i >= 0; i--) {
+            while(revRank < _length - (first + range)) {
+                if(revRank == _length - (first + range)) {
+                    break;
+                }
+                revRank += currentNode->_forwardSpans[i];
+                currentNode = currentNode->_forwards[i];
+            }
+            if(revRank == _length - (first + range)) {
+                break;
+            } else {
+                currentNode = currentNode->_backwards[i];
+                revRank -= currentNode->_forwardSpans[i];
+            }
+        }
+
+        for(unsigned long i = 0; i <= range; i++) {
+            std::pair<NodeType*,unsigned long> nodeRank;
+            nodeRank.first = currentNode;
+            nodeRank.second = _length - revRank;
+            ret.push_back(nodeRank);
+            revRank++;
+            currentNode = currentNode->_forwards[0];
+        }
+
+        return ret;
     }
 
     unsigned long GetLength() {
