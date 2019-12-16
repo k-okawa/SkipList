@@ -17,8 +17,8 @@ public:
     V _value;
     SkipNode<K, V, MAX_LEVEL>* _forwards[MAX_LEVEL];
     SkipNode<K, V, MAX_LEVEL>* _backwards[MAX_LEVEL];
-    int _forwardSpans[MAX_LEVEL];
-    int _sameIndex;
+    unsigned long _forwardSpans[MAX_LEVEL];
+    unsigned long _sameIndex;
 
     SkipNode() : _sameIndex(0) {
         for(int i = 0; i < MAX_LEVEL; i++) {
@@ -59,7 +59,7 @@ private:
     NodeType* _header;
     NodeType* _tail;
     int _currentMaxLevel;
-    int _length;
+    unsigned long _length;
     std::unordered_map<K,NodeType*> _nodeMap;
 
 public:
@@ -196,7 +196,32 @@ public:
         return nullptr;
     }
 
-    int GetLength() {
+    unsigned long GetRankByKey(K key) {
+        NodeType* target = Find(key);
+        if(target == nullptr) {
+            return 0;
+        }
+        unsigned long revRank = 0;
+        NodeType* currentNode = _header->_forwards[_currentMaxLevel];
+        for(int i = _currentMaxLevel; i >= 0; i--) {
+            while(currentNode->_value <= target->_value) {
+                if(currentNode->_key == key) {
+                    break;
+                }
+                revRank += currentNode->_forwardSpans[i];
+                currentNode = currentNode->_forwards[i];
+            }
+            if(currentNode->_key == key) {
+                break;
+            } else {
+                currentNode = currentNode->_backwards[i];
+                revRank -= currentNode->_forwardSpans[i];
+            }
+        }
+        return _length - revRank;
+    }
+
+    unsigned long GetLength() {
         return _length;
     }
 
