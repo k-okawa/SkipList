@@ -288,20 +288,6 @@ public:
         return sstr.str();
     }
 
-    bool Check() {
-        for(int i = _currentMaxLevel; i >= 0; i--) {
-            auto current = _header;
-            while(current != _tail) {
-                auto bef = current;
-                current = current->_forwards[i];
-                if(bef->_value > current->_value) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
 private:
     double UniformRandom() {
         return rand() / double(RAND_MAX);
