@@ -3,4 +3,4 @@ project(SkipList)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(SkipList main.cpp SkipList.h)
+add_executable(SkipList main.cpp SkipList.h RankingTableManager.h)
