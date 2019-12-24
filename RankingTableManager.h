@@ -44,16 +44,32 @@ public:
         return true;
     }
 
-    void RegistScore(string tableName, unsigned long score) {
+    bool RemoveTable(string tableName) {
+        if(!IsExistTable(tableName)) {
+            return false;
+        }
+        _rankTables.erase(tableName);
+        return true;
+    }
 
+    void RegistScore(string tableName,int userId, unsigned long score) {
+        CreateTableIfNotExist(tableName);
+        _rankTables[tableName].Set(userId, score);
     }
 
     unsigned long GetRank(string tableName, int userId) {
-
+        if(!IsExistTable(tableName)) {
+            return 0;
+        }
+        return _rankTables[tableName].GetRankByKey(userId);
     }
 
     std::vector<std::pair<NodeType*,unsigned long>> GetRange(string tableName, unsigned long first, unsigned long range) {
-
+        std::vector<std::pair<NodeType*,unsigned long>> ret;
+        if(!IsExistTable(tableName)) {
+            return ret;
+        }
+        return _rankTables[tableName].GetRange(first,range);
     }
 };
 
