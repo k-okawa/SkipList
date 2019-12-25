@@ -1,6 +1,7 @@
 #include <iostream>
 #include <time.h>
 #include "SkipList.h"
+#include "RankingTableManager.h"
 
 using namespace std;
 
@@ -12,24 +13,24 @@ int main() {
 //    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
 //    cout << "first insert time = " << time << endl;
 //
-    skipList.Set("okawa", 0);
-    skipList.Set("koike", 4423);
-    skipList.Set("okada", 3333);
-    skipList.Set("lee", 3333);
-    skipList.Set("sakuma", 3333);
-    skipList.Set("itokazu", 3413);
-    skipList.Set("banana",5343);
-    skipList.Set("Choco",2456);
-
-    cout << skipList.Print() << endl << endl;
-    cout << "length:" << skipList.GetLength() << endl;
-
-    unsigned long first = 6;
-    unsigned long range = 5;
-    auto pairs = skipList.GetRange(first,range);
-    for(auto nodeRank : pairs) {
-        cout << "key=" << nodeRank.first->_key << " rank=" << nodeRank.second << endl;
-    }
+//    skipList.Set("okawa", 0);
+//    skipList.Set("koike", 4423);
+//    skipList.Set("okada", 3333);
+//    skipList.Set("lee", 3333);
+//    skipList.Set("sakuma", 3333);
+//    skipList.Set("itokazu", 3413);
+//    skipList.Set("banana",5343);
+//    skipList.Set("Choco",2456);
+//
+//    cout << skipList.Print() << endl << endl;
+//    cout << "length:" << skipList.GetLength() << endl;
+//
+//    unsigned long first = 6;
+//    unsigned long range = 5;
+//    auto pairs = skipList.GetRange(first,range);
+//    for(auto nodeRank : pairs) {
+//        cout << "key=" << nodeRank.first->_key << " rank=" << nodeRank.second << endl;
+//    }
 
 //    int loopCount = 1000000;
 //    auto start = clock();
@@ -63,6 +64,12 @@ int main() {
 //    cout << "rank time = " << time << endl;
 //
 //    //cout << skipList.Print() << endl;
+
+    RankingTableManager rankManager;
+    rankManager.RegistScore("hello","okawa",100);
+    rankManager.RegistScore("hello","www",400);
+    rankManager.RegistScore("hello","aaa",300);
+    rankManager.RegistScore("hello","eeee",150);
 
     return 0;
 }

@@ -19,13 +19,13 @@ enum RankType {
 };
 
 class RankingTableManager {
-    typedef SkipNode<int, unsigned long, 32> NodeType;
+    typedef SkipNode<string, unsigned long, 32> NodeType;
 private:
-    unordered_map<string,SkipList<int, unsigned long>> _rankTables;
+    unordered_map<string,SkipList<string, unsigned long>*> _rankTables;
 
     void CreateTableIfNotExist(string tableName) {
         if(_rankTables.count(tableName) == 0) {
-            _rankTables[tableName] = SkipList<int, unsigned long>(0, ULONG_LONG_MAX);
+            _rankTables[tableName] = new SkipList<string, unsigned long>(0, ULONG_LONG_MAX);
         }
     }
 public:
@@ -34,7 +34,10 @@ public:
     }
 
     ~RankingTableManager() {
-
+        for(auto table : _rankTables) {
+            delete table.second;
+        }
+        _rankTables.clear();
     }
 
     bool IsExistTable(string tableName) {
@@ -45,23 +48,26 @@ public:
     }
 
     bool RemoveTable(string tableName) {
-        if(!IsExistTable(tableName)) {
+        auto itr = _rankTables.find(tableName);
+        if(itr == _rankTables.end()) {
             return false;
         }
+
+        delete itr->second;
         _rankTables.erase(tableName);
         return true;
     }
 
-    void RegistScore(string tableName,int userId, unsigned long score) {
+    void RegistScore(string tableName,string key, unsigned long score) {
         CreateTableIfNotExist(tableName);
-        _rankTables[tableName].Set(userId, score);
+        _rankTables[tableName]->Set(key, score);
     }
 
-    unsigned long GetRank(string tableName, int userId) {
+    unsigned long GetRank(string tableName, string key) {
         if(!IsExistTable(tableName)) {
             return 0;
         }
-        return _rankTables[tableName].GetRankByKey(userId);
+        return _rankTables[tableName]->GetRankByKey(key);
     }
 
     std::vector<std::pair<NodeType*,unsigned long>> GetRange(string tableName, unsigned long first, unsigned long range) {
@@ -69,7 +75,7 @@ public:
         if(!IsExistTable(tableName)) {
             return ret;
         }
-        return _rankTables[tableName].GetRange(first,range);
+        return _rankTables[tableName]->GetRange(first,range);
     }
 };
 

@@ -64,6 +64,10 @@ private:
     std::unordered_map<K,NodeType*> _nodeMap;
 
 public:
+    SkipList() {
+        SkipList(0,INT_MAX);
+    }
+
     SkipList(V minValue, V maxValue):
             _header(NULL),
             _tail(NULL),
