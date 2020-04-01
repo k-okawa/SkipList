@@ -99,6 +99,12 @@ public:
     }
 
     void Set(K key, V value) {
+        auto it = _nodeMap.find(key);
+        if(it != _nodeMap.end()) {
+            // すでに登録されているキーの場合一度削除
+            Erase(key);
+        }
+
         _length++;
         NodeType* updateNode[MAX_LEVEL];
         NodeType* currentNode = _header;
@@ -120,11 +126,6 @@ public:
                 _header->_forwardSpans[i] = _length + 1;
             }
             _currentMaxLevel = randomLevel;
-        }
-        auto it = _nodeMap.find(key);
-        if(it != _nodeMap.end()) {
-            // すでに登録されているキーの場合一度削除
-            Erase(key);
         }
 
         currentNode = new NodeType(key,value);
@@ -209,60 +210,61 @@ public:
         if(target == nullptr) {
             return 0;
         }
-        unsigned long revRank = 0;
-        NodeType* currentNode = _header->_forwards[_currentMaxLevel];
+
+        NodeType* currentNode = _tail->_backwards[_currentMaxLevel];
+        unsigned long rank = currentNode->_forwardSpans[_currentMaxLevel];
         for(int i = _currentMaxLevel; i >= 0; i--) {
-            while(currentNode->_value <= target->_value) {
+            while(currentNode->_value > target->_value) {
                 if(currentNode->_key == key) {
                     break;
                 }
-                revRank += currentNode->_forwardSpans[i];
-                currentNode = currentNode->_forwards[i];
+                currentNode = currentNode->_backwards[i];
+                rank += currentNode->_forwardSpans[i];
             }
             if(currentNode->_key == key) {
                 break;
             } else {
-                currentNode = currentNode->_backwards[i];
-                revRank -= currentNode->_forwardSpans[i];
+                rank -= currentNode->_forwardSpans[i];
+                currentNode = currentNode->_forwards[i];
             }
         }
-        return _length - revRank;
+        return rank;
     }
 
     std::vector<std::pair<NodeType*,unsigned long>> GetRange(unsigned long first, unsigned long range) {
         std::vector<std::pair<NodeType*,unsigned long>> ret;
-        if(first > _length) {
+        if(first <= 0 || first > _length) {
             return ret;
         }
         if(first + range > _length) {
             range = _length - first;
         }
 
-        unsigned long revRank = 0;
-        NodeType* currentNode = _header->_forwards[_currentMaxLevel];
+        NodeType* currentNode = _tail->_backwards[_currentMaxLevel];
+        unsigned long rank = currentNode->_forwardSpans[_currentMaxLevel];
         for(int i = _currentMaxLevel; i >= 0; i--) {
-            while(revRank < _length - (first + range)) {
-                if(revRank == _length - (first + range)) {
+            while(rank < first) {
+                if(rank == first) {
                     break;
                 }
-                revRank += currentNode->_forwardSpans[i];
-                currentNode = currentNode->_forwards[i];
+                rank += currentNode->_backwards[i]->_forwardSpans[i];
+                currentNode = currentNode->_backwards[i];
             }
-            if(revRank == _length - (first + range)) {
+            if(rank == first) {
                 break;
             } else {
-                currentNode = currentNode->_backwards[i];
-                revRank -= currentNode->_forwardSpans[i];
+                currentNode = currentNode->_forwards[i];
+                rank -= currentNode->_backwards[i]->_forwardSpans[i];
             }
         }
 
         for(unsigned long i = 0; i <= range; i++) {
             std::pair<NodeType*,unsigned long> nodeRank;
             nodeRank.first = currentNode;
-            nodeRank.second = _length - revRank;
+            nodeRank.second = rank;
             ret.push_back(nodeRank);
-            revRank++;
-            currentNode = currentNode->_forwards[0];
+            rank++;
+            currentNode = currentNode->_backwards[0];
         }
 
         return ret;

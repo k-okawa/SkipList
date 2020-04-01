@@ -8,19 +8,20 @@
 #include "SkipList.h"
 #include <unordered_map>
 #include <mutex>
+#include "float.h"
 
 using namespace std;
 
 class RankingTableManager {
-    typedef SkipNode<string, unsigned long, 32> NodeType;
+    typedef SkipNode<unsigned long, double, 32> NodeType;
 private:
-    unordered_map<string,SkipList<string, unsigned long>*> _rankTables;
+    unordered_map<string,SkipList<unsigned long, double>*> _rankTables;
     std::mutex _mtx;
 
     void CreateTableIfNotExist(string tableName) {
+        std::lock_guard<std::mutex> lock(_mtx);
         if(_rankTables.count(tableName) == 0) {
-            std::lock_guard<std::mutex> lock(_mtx);
-            _rankTables[tableName] = new SkipList<string, unsigned long>(0, ULONG_LONG_MAX);
+            _rankTables[tableName] = new SkipList<unsigned long, double>(DBL_MIN, DBL_MAX);
         }
     }
 public:
@@ -57,14 +58,22 @@ public:
         return true;
     }
 
-    void RegistScore(string tableName,string key, unsigned long score) {
+    bool RemoveAll() {
+        std::lock_guard<std::mutex> lock(_mtx);
+        for(auto table : _rankTables) {
+            delete table.second;
+        }
+        _rankTables.clear();
+    }
+
+    void RegistScore(string tableName, unsigned long key, double score) {
         CreateTableIfNotExist(tableName);
         _rankTables[tableName]->mtx.lock();
         _rankTables[tableName]->Set(key, score);
         _rankTables[tableName]->mtx.unlock();
     }
 
-    unsigned long GetRank(string tableName, string key) {
+    unsigned long GetRank(string tableName, unsigned long key) {
         if(!IsExistTable(tableName)) {
             return 0;
         }
@@ -75,14 +84,49 @@ public:
     }
 
     std::vector<std::pair<NodeType*,unsigned long>> GetRange(string tableName, unsigned long first, unsigned long range) {
-        std::vector<std::pair<NodeType*,unsigned long>> ret;
-        if(!IsExistTable(tableName)) {
+        std::vector<std::pair<NodeType *, unsigned long>> ret;
+        if (!IsExistTable(tableName)) {
             return ret;
         }
         _rankTables[tableName]->mtx.lock();
-        ret = _rankTables[tableName]->GetRange(first,range);
+        ret = _rankTables[tableName]->GetRange(first, range);
         _rankTables[tableName]->mtx.unlock();
         return ret;
+    }
+
+    unsigned long GetTableLength(string tableName) {
+        if(!IsExistTable(tableName)) {
+            return 0;
+        }
+
+        return _rankTables[tableName]->GetLength();
+    }
+
+    double GetScore(string tableName, unsigned long key) {
+        if(!IsExistTable(tableName)) {
+            return 0;
+        }
+
+        NodeType* node = _rankTables[tableName]->Find(key);
+        if(node == nullptr) {
+            return 0;
+        }
+
+        return _rankTables[tableName]->Find(key)->_value;
+    }
+
+    bool RemoveNode(string tableName, unsigned long key) {
+        if(!IsExistTable(tableName)) {
+            return false;
+        }
+
+        NodeType* node = _rankTables[tableName]->Find(key);
+        if(node == nullptr) {
+            return false;
+        }
+
+        _rankTables[tableName]->Erase(key);
+        return true;
     }
 
     string Print(string tableName) {
