@@ -80,6 +80,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/kyohei.okawa/Desktop/SkipList/RankingTableManager.h">
+			<Option target="SkipList"/>
+		</Unit>
 		<Unit filename="/Users/kyohei.okawa/Desktop/SkipList/SkipList.h">
 			<Option target="SkipList"/>
 		</Unit>

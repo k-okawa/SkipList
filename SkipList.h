@@ -9,6 +9,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <mutex>
 using namespace std;
 
 template<class K,class V,int MAX_LEVEL>
@@ -64,6 +65,8 @@ private:
     std::unordered_map<K,NodeType*> _nodeMap;
 
 public:
+    std::mutex mtx;
+
     SkipList() {
         SkipList(0,INT_MAX);
     }
@@ -291,6 +294,8 @@ public:
 
         return sstr.str();
     }
+
+
 
 private:
     double UniformRandom() {

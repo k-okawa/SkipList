@@ -5,6 +5,20 @@
 
 using namespace std;
 
+//int main() {
+//    //key: int, score: unsigned long
+//    SkipList<int, unsigned  long> skipList(0, ULONG_LONG_MAX);
+//    int loopCount = 1000000;
+//    auto start = clock();
+//    for(int i = 0; i < loopCount; i++){
+//        // データをセット
+//        skipList.Set(i, rand() % loopCount);
+//    }
+//    auto end = clock();
+//    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+//    cout << "データの追加にかかった時間:" << time << "ms" << endl;
+//}
+
 int main() {
     SkipList<string, unsigned long> skipList(0,ULONG_LONG_MAX);
 //    auto start = clock();
@@ -66,10 +80,15 @@ int main() {
 //    //cout << skipList.Print() << endl;
 
     RankingTableManager rankManager;
-    rankManager.RegistScore("hello","okawa",100);
-    rankManager.RegistScore("hello","www",400);
-    rankManager.RegistScore("hello","aaa",300);
-    rankManager.RegistScore("hello","eeee",150);
+    int loopCount = 1000000;
+    auto start = clock();
+    for(int i = 0; i < loopCount; i++){
+        rankManager.RegistScore("hello",to_string(i), rand() % loopCount);
+    }
+    auto end = clock();
+    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+    cout << "データの追加にかかった時間:" << time << "ms" << endl;
+    //cout << rankManager.Print("hello") << std::endl;
 
     return 0;
 }

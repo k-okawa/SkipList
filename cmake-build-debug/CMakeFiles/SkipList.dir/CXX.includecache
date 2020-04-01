@@ -6,10 +6,22 @@
 
 #IncludeRegexTransform: 
 
+/Users/kyohei.okawa/Desktop/SkipList/RankingTableManager.h
+SkipList.h
+/Users/kyohei.okawa/Desktop/SkipList/SkipList.h
+unordered_map
+-
+mutex
+-
+
 /Users/kyohei.okawa/Desktop/SkipList/SkipList.h
 iostream
 -
 sstream
+-
+unordered_map
+-
+vector
 -
 
 /Users/kyohei.okawa/Desktop/SkipList/main.cpp
@@ -19,4 +31,6 @@ time.h
 -
 SkipList.h
 /Users/kyohei.okawa/Desktop/SkipList/SkipList.h
+RankingTableManager.h
+/Users/kyohei.okawa/Desktop/SkipList/RankingTableManager.h
 

@@ -11,20 +11,15 @@
 
 using namespace std;
 
-enum RankType {
-    YEARY = 0,
-    MONTHLY = 1,
-    WEEKLY = 2,
-    DAILY = 3
-};
-
 class RankingTableManager {
     typedef SkipNode<string, unsigned long, 32> NodeType;
 private:
     unordered_map<string,SkipList<string, unsigned long>*> _rankTables;
+    std::mutex _mtx;
 
     void CreateTableIfNotExist(string tableName) {
         if(_rankTables.count(tableName) == 0) {
+            std::lock_guard<std::mutex> lock(_mtx);
             _rankTables[tableName] = new SkipList<string, unsigned long>(0, ULONG_LONG_MAX);
         }
     }
@@ -34,6 +29,7 @@ public:
     }
 
     ~RankingTableManager() {
+        std::lock_guard<std::mutex> lock(_mtx);
         for(auto table : _rankTables) {
             delete table.second;
         }
@@ -41,6 +37,7 @@ public:
     }
 
     bool IsExistTable(string tableName) {
+        std::lock_guard<std::mutex> lock(_mtx);
         if(_rankTables.count(tableName) == 0) {
             return false;
         }
@@ -48,6 +45,8 @@ public:
     }
 
     bool RemoveTable(string tableName) {
+        std::lock_guard<std::mutex> lock(_mtx);
+
         auto itr = _rankTables.find(tableName);
         if(itr == _rankTables.end()) {
             return false;
@@ -60,14 +59,19 @@ public:
 
     void RegistScore(string tableName,string key, unsigned long score) {
         CreateTableIfNotExist(tableName);
+        _rankTables[tableName]->mtx.lock();
         _rankTables[tableName]->Set(key, score);
+        _rankTables[tableName]->mtx.unlock();
     }
 
     unsigned long GetRank(string tableName, string key) {
         if(!IsExistTable(tableName)) {
             return 0;
         }
-        return _rankTables[tableName]->GetRankByKey(key);
+        _rankTables[tableName]->mtx.lock();
+        unsigned long rank = _rankTables[tableName]->GetRankByKey(key);
+        _rankTables[tableName]->mtx.unlock();
+        return rank;
     }
 
     std::vector<std::pair<NodeType*,unsigned long>> GetRange(string tableName, unsigned long first, unsigned long range) {
@@ -75,7 +79,21 @@ public:
         if(!IsExistTable(tableName)) {
             return ret;
         }
-        return _rankTables[tableName]->GetRange(first,range);
+        _rankTables[tableName]->mtx.lock();
+        ret = _rankTables[tableName]->GetRange(first,range);
+        _rankTables[tableName]->mtx.unlock();
+        return ret;
+    }
+
+    string Print(string tableName) {
+        if(!IsExistTable(tableName)) {
+            return "";
+        }
+
+        _rankTables[tableName]->mtx.lock();
+        string ret = _rankTables[tableName]->Print();
+        _rankTables[tableName]->mtx.unlock();
+        return ret;
     }
 };
 
