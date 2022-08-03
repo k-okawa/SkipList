@@ -66,7 +66,7 @@ public:
         _rankTables.clear();
     }
 
-    void RegistScore(string tableName, unsigned long key, double score) {
+    void ResistScore(string tableName, unsigned long key, double score) {
         CreateTableIfNotExist(tableName);
         _rankTables[tableName]->mtx.lock();
         _rankTables[tableName]->Set(key, score);
